@@ -1,0 +1,7 @@
+project_id = "bqzsuuqplzxnnahsrcwi"
+
+[functions.fetch-sheets-data]
+verify_jwt = false
+
+[functions.chat-analytics]
+verify_jwt = false
