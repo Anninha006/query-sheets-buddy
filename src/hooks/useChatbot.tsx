@@ -11,7 +11,7 @@ export const useChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Olá! Sou seu assistente analítico de vendas. Configure suas credenciais do Google Sheets primeiro, depois pode me fazer perguntas sobre seus dados de vendas, como:\n\n• Qual foi o produto mais vendido no terceiro trimestre?\n• Qual a variação percentual de receita entre janeiro e dezembro?\n• Quais são os top 5 produtos por faturamento?\n• Como está a performance de vendas por região?",
+      content: "Olá! Sou seu assistente analítico de vendas. Configure o ID da pasta do Google Drive com todas as suas planilhas primeiro, depois pode me fazer perguntas sobre seus dados de vendas, como:\n\n• Qual foi o produto mais vendido no terceiro trimestre?\n• Qual a variação percentual de receita entre janeiro e dezembro?\n• Quais são os top 5 produtos por faturamento?\n• Como está a performance de vendas por região?\n• Mostre um resumo comparativo de todas as planilhas",
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +20,9 @@ export const useChatbot = () => {
 
   const loadSalesData = async () => {
     const apiKey = localStorage.getItem("google_api_key");
-    const spreadsheetId = localStorage.getItem("spreadsheet_id");
+    const folderId = localStorage.getItem("folder_id");
 
-    if (!apiKey || !spreadsheetId) {
+    if (!apiKey || !folderId) {
       toast({
         title: "Configuração necessária",
         description: "Por favor, configure suas credenciais primeiro",
@@ -33,10 +33,10 @@ export const useChatbot = () => {
 
     try {
       setIsLoading(true);
-      console.log("Buscando dados do Google Sheets...");
+      console.log("Buscando dados de todas as planilhas...");
 
       const { data, error } = await supabase.functions.invoke("fetch-sheets-data", {
-        body: { apiKey, spreadsheetId },
+        body: { apiKey, folderId },
       });
 
       if (error) throw error;

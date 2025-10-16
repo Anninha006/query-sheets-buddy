@@ -11,51 +11,80 @@ serve(async (req) => {
   }
 
   try {
-    const { apiKey, spreadsheetId } = await req.json();
+    const { apiKey, folderId } = await req.json();
 
-    if (!apiKey || !spreadsheetId) {
-      throw new Error("API Key e Spreadsheet ID são obrigatórios");
+    if (!apiKey || !folderId) {
+      throw new Error("API Key e Folder ID são obrigatórios");
     }
 
-    // Buscar todas as 12 planilhas (assumindo que são abas de Janeiro a Dezembro)
-    const months = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
+    // Buscar todos os arquivos do Google Sheets na pasta
+    const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='application/vnd.google-apps.spreadsheet'&key=${apiKey}`;
+    
+    console.log('Buscando planilhas na pasta...');
+    const driveResponse = await fetch(driveUrl);
+    
+    if (!driveResponse.ok) {
+      const error = await driveResponse.text();
+      throw new Error(`Erro ao acessar pasta do Drive: ${error}`);
+    }
+
+    const driveData = await driveResponse.json();
+    const spreadsheets = driveData.files || [];
+    
+    console.log(`${spreadsheets.length} planilhas encontradas`);
 
     const allData: any[] = [];
 
-    for (const month of months) {
-      const range = `${month}!A:Z`; // Pega todas as colunas da aba
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+    // Para cada planilha encontrada
+    for (const sheet of spreadsheets) {
+      const spreadsheetId = sheet.id;
+      const spreadsheetName = sheet.name;
       
-      console.log(`Buscando dados de ${month}...`);
+      console.log(`Processando: ${spreadsheetName}`);
       
-      const response = await fetch(url);
+      // Buscar metadados da planilha para descobrir as abas
+      const metadataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?key=${apiKey}`;
+      const metadataResponse = await fetch(metadataUrl);
       
-      if (!response.ok) {
-        const error = await response.text();
-        console.error(`Erro ao buscar ${month}:`, error);
-        continue; // Continua com os outros meses mesmo se um falhar
+      if (!metadataResponse.ok) {
+        console.error(`Erro ao buscar metadados de ${spreadsheetName}`);
+        continue;
       }
-
-      const data = await response.json();
       
-      if (data.values && data.values.length > 0) {
-        // Primeira linha contém os cabeçalhos
-        const headers = data.values[0];
-        const rows = data.values.slice(1);
+      const metadata = await metadataResponse.json();
+      const sheetNames = metadata.sheets?.map((s: any) => s.properties.title) || [];
+      
+      // Buscar dados de cada aba
+      for (const sheetName of sheetNames) {
+        const range = `${sheetName}!A:Z`;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
         
-        // Converter para objetos
-        const monthData = rows.map((row: any[]) => {
-          const obj: any = { mes: month };
-          headers.forEach((header: string, index: number) => {
-            obj[header] = row[index] || '';
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error(`Erro ao buscar ${sheetName} de ${spreadsheetName}`);
+          continue;
+        }
+
+        const data = await response.json();
+        
+        if (data.values && data.values.length > 0) {
+          const headers = data.values[0];
+          const rows = data.values.slice(1);
+          
+          const sheetData = rows.map((row: any[]) => {
+            const obj: any = { 
+              planilha: spreadsheetName,
+              aba: sheetName
+            };
+            headers.forEach((header: string, index: number) => {
+              obj[header] = row[index] || '';
+            });
+            return obj;
           });
-          return obj;
-        });
-        
-        allData.push(...monthData);
+          
+          allData.push(...sheetData);
+        }
       }
     }
 

@@ -13,19 +13,19 @@ interface ConfigPanelProps {
 
 export const ConfigPanel = ({ isOpen, onClose }: ConfigPanelProps) => {
   const [apiKey, setApiKey] = useState("");
-  const [spreadsheetId, setSpreadsheetId] = useState("");
+  const [folderId, setFolderId] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     // Carregar configurações do localStorage
     const savedApiKey = localStorage.getItem("google_api_key");
-    const savedSpreadsheetId = localStorage.getItem("spreadsheet_id");
+    const savedFolderId = localStorage.getItem("folder_id");
     if (savedApiKey) setApiKey(savedApiKey);
-    if (savedSpreadsheetId) setSpreadsheetId(savedSpreadsheetId);
+    if (savedFolderId) setFolderId(savedFolderId);
   }, []);
 
   const handleSave = () => {
-    if (!apiKey || !spreadsheetId) {
+    if (!apiKey || !folderId) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos",
@@ -35,7 +35,7 @@ export const ConfigPanel = ({ isOpen, onClose }: ConfigPanelProps) => {
     }
 
     localStorage.setItem("google_api_key", apiKey);
-    localStorage.setItem("spreadsheet_id", spreadsheetId);
+    localStorage.setItem("folder_id", folderId);
     
     toast({
       title: "Configurações salvas",
@@ -56,7 +56,7 @@ export const ConfigPanel = ({ isOpen, onClose }: ConfigPanelProps) => {
             Configurações
           </CardTitle>
           <CardDescription>
-            Configure suas credenciais para acessar o Google Sheets
+            Configure suas credenciais para acessar todas as planilhas da pasta
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -75,15 +75,15 @@ export const ConfigPanel = ({ isOpen, onClose }: ConfigPanelProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="spreadsheet-id">ID da Planilha</Label>
+            <Label htmlFor="folder-id">ID da Pasta (Google Drive)</Label>
             <Input
-              id="spreadsheet-id"
-              value={spreadsheetId}
-              onChange={(e) => setSpreadsheetId(e.target.value)}
-              placeholder="ID da planilha do Google Sheets"
+              id="folder-id"
+              value={folderId}
+              onChange={(e) => setFolderId(e.target.value)}
+              placeholder="ID da pasta do Google Drive"
             />
             <p className="text-xs text-muted-foreground">
-              Encontre na URL: docs.google.com/spreadsheets/d/[ID]/edit
+              Encontre na URL: drive.google.com/drive/folders/[ID]/
             </p>
           </div>
 
