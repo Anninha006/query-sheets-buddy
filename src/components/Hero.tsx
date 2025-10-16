@@ -32,7 +32,7 @@ const Hero = () => {
                 <Button 
                   size="lg" 
                   className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg transition-all"
-                  onClick={() => window.open('https://forms.google.com', '_blank')}
+                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeE64tnmaq9uBgyILTg7RgGoc8XSu3OZbzk26F_FmPDLZ6TDQ/viewform', '_blank')}
                 >
                   <FileText className="mr-2 h-5 w-5" />
                   Preencher Formulário
