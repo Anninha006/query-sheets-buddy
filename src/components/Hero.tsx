@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { MessageSquare, FileText, TrendingUp, Brain, BarChart3, Zap } from "lucide-react";
 import heroImage from "@/assets/hero-analytics.jpg";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Hero Section */}
@@ -32,7 +34,7 @@ const Hero = () => {
                 <Button 
                   size="lg" 
                   className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg transition-all"
-                  onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeE64tnmaq9uBgyILTg7RgGoc8XSu3OZbzk26F_FmPDLZ6TDQ/viewform', '_blank')}
+                  onClick={() => navigate('/formulario')}
                 >
                   <FileText className="mr-2 h-5 w-5" />
                   Preencher Formulário
@@ -42,7 +44,7 @@ const Hero = () => {
                   size="lg" 
                   variant="outline"
                   className="text-lg px-8 py-6 border-2 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
-                  onClick={() => window.location.href = '/chatbot'}
+                  onClick={() => navigate('/chatbot')}
                 >
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Acessar Chatbot
